@@ -1,31 +1,39 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ApiCookieAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { CurrentUser } from '../../../common/decorators/current-user.decorator';
+import { Roles } from '../../../common/decorators/roles.decorator';
+import {
+  ApiErrorResponse,
+  ApiPaginatedResponse,
+  ApiSuccessResponse,
+} from '../../../common/decorators/swagger';
+import { Role } from '../../../common/enums/role.enum';
+import { RolesGuard } from '../../../common/guards/roles.guard';
+import { ListTasksQueryDto } from '../tasks/dto/list-tasks-query.dto';
+import { TaskResponseDto } from '../tasks/dto/task-response.dto';
+import { TasksService } from '../tasks/tasks.service';
+import { User } from '../users/entities/user.entity';
 import { AdminService } from './admin.service';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
-import { Roles } from '../../../common/decorators/roles.decorator';
-import { RolesGuard } from '../../../common/guards/roles.guard';
-import { CurrentUser } from '../../../common/decorators/current-user.decorator';
-import { Role } from '../../../common/enums/role.enum';
-import { User } from '../users/entities/user.entity';
-import {
-  ApiSuccessResponse,
-  ApiErrorResponse,
-} from '../../../common/decorators/swagger';
 
 @ApiTags('Admin')
 @Controller('admin')
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(
+    private readonly adminService: AdminService,
+    private readonly tasksService: TasksService,
+  ) {}
 
   @ApiOperation({
     summary: 'Admin test endpoint',
@@ -40,6 +48,18 @@ export class AdminController {
   @UseGuards(RolesGuard)
   test(@CurrentUser() user: User) {
     return { message: 'Hello admin', userId: user.id };
+  }
+
+  @Get('tasks')
+  @Roles(Role.ADMIN)
+  @UseGuards(RolesGuard)
+  @ApiOperation({ summary: "List all users' tasks (admin only)" })
+  @ApiCookieAuth('access_token')
+  @ApiPaginatedResponse(TaskResponseDto)
+  @ApiErrorResponse(401, 'UNAUTHORIZED', 'Not authenticated')
+  @ApiErrorResponse(403, 'FORBIDDEN', 'Admin role required')
+  listAllTasks(@Query() query: ListTasksQueryDto) {
+    return this.tasksService.findAllAdmin(query);
   }
 
   @Post()

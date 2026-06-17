@@ -1,26 +1,35 @@
 import { Injectable } from '@nestjs/common';
-import { CreateTaskActivityDto } from './dto/create-task-activity.dto';
-import { UpdateTaskActivityDto } from './dto/update-task-activity.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { TaskActivityAction } from '../../../common/enums/task-activity-action.enum';
+import { TaskActivity } from './entities/task-activity.entity';
 
 @Injectable()
 export class TaskActivitiesService {
-  create(createTaskActivityDto: CreateTaskActivityDto) {
-    return 'This action adds a new taskActivity';
+  constructor(
+    @InjectRepository(TaskActivity)
+    private readonly repo: Repository<TaskActivity>,
+  ) {}
+
+  async create(data: {
+    taskId: string;
+    userId: string;
+    action: TaskActivityAction;
+    changes?: Record<string, unknown>;
+  }): Promise<TaskActivity> {
+    return this.repo.save({
+      taskId: data.taskId,
+      userId: data.userId,
+      action: data.action,
+      changes: data.changes ?? null,
+    });
   }
 
-  findAll() {
-    return `This action returns all taskActivities`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} taskActivity`;
-  }
-
-  update(id: number, updateTaskActivityDto: UpdateTaskActivityDto) {
-    return `This action updates a #${id} taskActivity`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} taskActivity`;
+  async findByTaskId(taskId: string): Promise<TaskActivity[]> {
+    return this.repo.find({
+      where: { taskId },
+      order: { createdAt: 'DESC' },
+      take: 50,
+    });
   }
 }
