@@ -25,6 +25,29 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+## Run with Docker
+
+**Prerequisites:** Docker and Docker Compose installed.
+
+1. Copy and fill in secrets:
+   ```bash
+   cp .env.example .env
+   # Edit .env — replace the placeholder JWT secrets with real values:
+   #   openssl rand -base64 32
+   ```
+
+2. Start the stack:
+   ```bash
+   docker-compose up -d --build
+   ```
+   Compose will start Postgres, wait for it to be healthy, run DB migrations, then start the backend.
+
+3. **Backend:** http://localhost:4000 — **Swagger docs:** http://localhost:4000/api/docs
+
+> To run the full stack including the frontend, see `manageit-frontend`'s README for its own independent docker-compose setup.
+
+---
+
 ## Project setup
 
 ```bash
