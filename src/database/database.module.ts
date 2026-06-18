@@ -13,7 +13,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         username: config.get<string>('DB_USERNAME'),
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_NAME'),
-        schema: config.get<string>('DB_SCHEMA') || 'public',
         synchronize: false,
         autoLoadEntities: true,
         migrationsRun: false,
