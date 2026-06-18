@@ -148,7 +148,10 @@ export class TasksService {
     const { status, search, sortBy, sortOrder, page, limit } = query;
     const direction = (sortOrder ?? 'desc').toUpperCase() as 'ASC' | 'DESC';
 
-    const qb = this.repo.createQueryBuilder('task');
+    const qb = this.repo
+      .createQueryBuilder('task')
+      .leftJoin('task.user', 'user')
+      .addSelect(['user.id', 'user.name', 'user.email']);
 
     if (status) {
       qb.andWhere('task.status = :status', { status });
