@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import {
   BadRequestException,
+  Logger,
   ValidationPipe,
   VersioningType,
 } from '@nestjs/common';
@@ -11,11 +12,15 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 async function bootstrap() {
+  const logger = new Logger('Bootstrap');
+  const port = process.env.PORT ?? 4000;
+  const frontendUrl = process.env.FRONTEND_URL?.trim();
+
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
   app.setGlobalPrefix('api');
   app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1' });
-  app.enableCors({ origin: process.env.FRONTEND_URL, credentials: true });
+  app.enableCors({ origin: frontendUrl, credentials: true });
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -65,7 +70,9 @@ async function bootstrap() {
     },
   });
 
-  await app.listen(process.env.PORT ?? 4000);
+  await app.listen(port, '0.0.0.0');
+  logger.log(`ManageIt API listening on 0.0.0.0:${port}`);
+  logger.log(`CORS origin: ${frontendUrl ?? 'not set'}`);
 }
 
 void bootstrap();
