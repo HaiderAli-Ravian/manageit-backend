@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TasksService } from '../tasks/tasks.service';
 import { AdminController } from './admin.controller';
-import { AdminService } from './admin.service';
 
 describe('AdminController', () => {
   let controller: AdminController;
@@ -9,10 +8,7 @@ describe('AdminController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AdminController],
-      providers: [
-        { provide: AdminService, useValue: {} },
-        { provide: TasksService, useValue: {} },
-      ],
+      providers: [{ provide: TasksService, useValue: {} }],
     }).compile();
 
     controller = module.get<AdminController>(AdminController);
